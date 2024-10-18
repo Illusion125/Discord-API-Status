@@ -5,6 +5,8 @@ const config = require('./settings/config.json');
 // Import the webhook URL from the config file
 const webhookClient = new WebhookClient({ url: config.url });
 
+let lastIncidentId = null;
+
 // Check the Discord status page for incidents
 function checkStatus() {
     https.get('https://discordstatus.com/api/v2/incidents.json', (res) => {
@@ -18,24 +20,27 @@ function checkStatus() {
             const incidents = JSON.parse(data).incidents;
             if (incidents.length > 0) {
                 const latestIncident = incidents[0];
-                const updates = latestIncident.incident_updates.map(update => {
-                    return {
-                        name: `${update.status.charAt(0).toUpperCase() + update.status.slice(1)} (<t:${Math.floor(new Date(update.created_at).getTime() / 1000)}:R>)`,
-                        value: update.body,
-                        inline: false
-                    };
-                });
-                const affectedComponents = latestIncident.components.map(component => component.name).join(', ');
+                if (latestIncident.id !== lastIncidentId) {
+                    lastIncidentId = latestIncident.id;
+                    const updates = latestIncident.incident_updates.map(update => {
+                        return {
+                            name: `${update.status.charAt(0).toUpperCase() + update.status.slice(1)} (<t:${Math.floor(new Date(update.created_at).getTime() / 1000)}:R>)`,
+                            value: update.body,
+                            inline: false
+                        };
+                    });
+                    const affectedComponents = latestIncident.components.map(component => component.name).join(', ');
 
-                const embed = new EmbedBuilder()
-                    .setTitle(`${latestIncident.name}`)
-                    .setURL(latestIncident.shortlink)
-                    .setColor(getStatusColor(latestIncident.status))
-                    .setDescription(`• Impact: ${latestIncident.impact}\n• Affected Components: ${affectedComponents}`)
-                    .addFields(...updates)
-                    .setTimestamp(new Date(latestIncident.updated_at))
-                    .setFooter({ text: `${latestIncident.id}` });
-                webhookClient.send({ embeds: [embed] });
+                    const embed = new EmbedBuilder()
+                        .setTitle(`${latestIncident.name}`)
+                        .setURL(latestIncident.shortlink)
+                        .setColor(getStatusColor(latestIncident.status))
+                        .setDescription(`• Impact: ${latestIncident.impact}\n• Affected Components: ${affectedComponents}`)
+                        .addFields(...updates)
+                        .setTimestamp(new Date(latestIncident.updated_at))
+                        .setFooter({ text: `${latestIncident.id}` });
+                    webhookClient.send({ embeds: [embed] });
+                }
             } else {
                 const embed = new EmbedBuilder()
                     .setTitle('No incidents reported')
