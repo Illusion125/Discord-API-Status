@@ -8,7 +8,7 @@
       "build": "tsc",
       "start": "tsc && node ./index.js"
     },
-    "author": "Laennart",
+    "author": "Illusion",
     "license": "ISC",
     "dependencies": {
       "discord.js": "^14.4.1",
