@@ -12,7 +12,7 @@ This project is a Node.js application that monitors the status of the Discord AP
 
 1. Clone the repository:
     ```bash
-    git clone https://github.com/Illusion125/Discord-API-Status.git
+    git clone https://github.com/yourusername/discord-api-status-bot.git
     cd discord-api-status-bot
     ```
 
@@ -51,3 +51,7 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ## Contributing
 
 Contributions are welcome! Please open an issue or submit a pull request for any changes.
+
+## Contact
+
+For any questions or suggestions, please contact [yourname@example.com](mailto:yourname@example.com).
