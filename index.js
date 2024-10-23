@@ -5,6 +5,9 @@ const config = require('./settings/config.json');
 // Import the webhook URL from the config file
 const webhookClient = new WebhookClient({ url: config.url });
 
+let lastIncidentId = null;
+let lastMessageId = null;
+
 // Check the Discord status page for incidents
 function checkStatus() {
     https.get('https://discordstatus.com/api/v2/incidents.json', (res) => {
@@ -35,7 +38,15 @@ function checkStatus() {
                     .addFields(...updates)
                     .setTimestamp(new Date(latestIncident.updated_at))
                     .setFooter({ text: `${latestIncident.id}` });
-                webhookClient.send({ embeds: [embed] });
+
+                if (latestIncident.id !== lastIncidentId) {
+                    lastIncidentId = latestIncident.id;
+                    webhookClient.send({ embeds: [embed] }).then(message => {
+                        lastMessageId = message.id;
+                    });
+                } else if (lastMessageId) {
+                    webhookClient.editMessage(lastMessageId, { embeds: [embed] });
+                }
             } else {
                 const embed = new EmbedBuilder()
                     .setTitle('No incidents reported')
